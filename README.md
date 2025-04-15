@@ -1,51 +1,39 @@
-# Data for ML Project "Sentiment Analysis" - Module 1: 
+# Data for ML Project "Sentiment Analysis" - Module 2: Data Pre-processing
 
-This repository contains the first module of the **Data for ML** project, which focuses on **sentiment analysis**. The project leverages a labeled Kaggle dataset of tweets and YouTube comment data parsed from the YouTube platform.
+This project is focused on the data pre-processing phase for a sentiment analysis task. The goal is to clean and prepare the data for downstream tasks such as sentiment classification.
 
-### **Installation**
+## Pre-processing Steps
 
-Clone the repository and create conda env using environment.yml file.
+1. **Removing Duplicates:**
+   - Duplicates from the original YouTube parsed dataset have been removed to ensure that only unique records are included.
 
-### **YouTube Comment Parsing**
+2. **Cleaning texts:**
+   - **Nicknames & Mentions:** All @mentions and nicknames were removed from the tweets.
+   - **Numbers:** All numbers were removed.
+   - **Links:** URLs (both `http` and `https` as well as `www`) were removed from the tweets.
+   - **Punctuation & Emojis:** All punctuation and emojis were stripped from the text.
 
-For the YouTube comment dataset, **70 random search topics** were generated using **ChatGPT**. For each topic, the following data was collected from the top 10 most popular videos:
-- **Top 70 recent comments**
-- **Top 70 popular comments**
+3. **Removing Non-English Texts:**
+   - Texts that were not in English were removed from the dataset. However, there was an issue with comments written in non-English languages but using Latin letters. Visual inspection didn't reveal many such instances, so it's assumed that these will be mostly addressed when filtering out the rarest words in the dataset with the help of max_df and min_df in TFIDF.
 
-The comments were retrieved using existing YouTube scraping libraries. Note that this dataset is **unlabeled**, so the sentiment of the comments has not been pre-assigned.
+4. **Dataset Size:**
+   - After pre-processing, the final dataset has 113,089 entries, compared to the original 115,631. This reduction is mainly due to the removal of duplicates and non-English content.
 
-### **Datasets Overview**
+5. **Integration with Dagster:**
+   - The `preprocess_data` asset was added to the Dagster pipeline. A new node for this step can be seen in the DAG.
 
-- **Kaggle Tweets Dataset**: Labeled sentiment data from Kaggle.
-- **YouTube Comments Dataset**: Unlabeled sentiment data scraped based on generated topics.
+<img src="imgs/preprocess.png" alt="Alt text" width="700"/>
 
-### **Data Preprocessing & Aggregation**
+6. **Next Steps:**
+   - After pre-processing, the cleaned data is ready to be sent to the tokenizer and / or vectorizer.
 
-- **YouTube Comments Filtering**: To match the distribution of the tweets, YouTube comments were filtered by length (comments with less than 50 words).
-- **Downsampling**: The Kaggle tweet dataset was downsampled to match the size of the YouTube data.
-- **Data Aggregation**: Both datasets were aggregated into a single dataframe containing only two columns:
-  - `text` (comment or tweet content)
-  - `sentiment` (sentiment label, where 0 = negative, 1 = positive, NaN for youtube dataset)
+## Sentiment Analysis Pre-processing
 
-### **Exploratory Data Analysis (EDA)**
+- The text data has been pre-processed specifically for the sentiment analysis task by:
+  - **Removing stop-words** to focus on the more meaningful content.
+  - **Lemmatization** to reduce words to their root form, ensuring uniformity in text representation.
+  - These operations were performed using the `spaCy` library.
 
-Exploratory data analysis (EDA) for both datasets is available in the Jupyter notebook:
-```
-notebooks/EDA.ipynb
-```
+## Conclusion
 
-This notebook provides insights into the characteristics of the datasets, including distributions, word clouds, and basic statistical analysis.
-
-### **Running the Dagster Pipeline**
-
-The entire data processing pipeline is wrapped in **Dagster**. To run the Dagster pipeline for data ingestion, you can use the following command from the **root directory**:
-
-```bash
-dagster dev -f dags/data_ingestion.py
-```
-
-Navigate to the localhost and, if needed, materialize the process. If youtube dataset already exists, it will not be scrapped again. However, you can modify this in the dags/data_ingestion.py in the respective function. 
-
-Below is the example screenshot of the process.
-
-<img src="imgs/screenshot.png" alt="Alt text" width="700"/>
+With this cleaned and processed dataset, the sentiment analysis model can now be trained on well-prepared data. The pre-processing steps have removed irrelevant noise and standardized the text for optimal model performance.
