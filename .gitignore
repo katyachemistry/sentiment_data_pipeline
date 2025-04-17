@@ -1,3 +1,5 @@
 trial.ipynb
 *tmp*
-data/raw/   
+data/raw/
+data/*csv
+data/*par*
