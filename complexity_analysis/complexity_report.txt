@@ -1,0 +1,10 @@
+🧠 Complexity Analysis Report
+===================================
+📌 Shannon Entropy of Labels: 1.5334
+📌 Mutual Information (Text Length ↔ Sentiment): 0.0497
+📌 Percentage of Uncertain Predictions (confidence < 0.6): 22.65%
+
+✅ Saved 1547 confident → data/auto_annotated_confident.parquet
+⚠️ Saved 453 uncertain → data/auto_annotated_non_confident.parquet
+
+📊 Visualizations saved in 'complexity_analysis/' folder.

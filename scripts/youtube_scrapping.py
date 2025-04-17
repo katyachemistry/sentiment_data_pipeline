@@ -11,7 +11,7 @@ from youtube_comment_downloader import *
 
 def parse_youtube_comments( 
     topics_path='scripts/topics.json',
-    output_df_path='/data/raw/youtube_comments_dfs.csv',
+    output_df_path='data/raw/youtube_comments_df.parquet',
     X=70,
     Y=10,
     K=140,
@@ -24,7 +24,7 @@ def parse_youtube_comments(
     if output_file.exists() and not force:
         print(f"⚠️ File '{output_df_path}' already exists. Skipping scraping.\n"
               f"✅ Use `force=True` to re-scrape and overwrite the file. It will take ~1.5 hours.")
-        return pd.read_csv(output_df_path)
+        return pd.read_parquet(output_df_path)
 
     # Set random seed for reproducibility
     random.seed(seed)
@@ -84,15 +84,14 @@ def parse_youtube_comments(
     df['replies'] = pd.to_numeric(df['replies'], errors='coerce')
 
     Path(os.path.dirname(output_df_path)).mkdir(parents=True, exist_ok=True)
-    df.to_csv(output_df_path, index=False)
+    df.to_parquet(output_df_path, index=False)
     print(f"✅ Saved DataFrame with {len(df)} comments to {output_df_path}")
 
-    return df
 
 if __name__ == "__main__":
     parser = argparse.ArgumentParser(description="Scrape YouTube comments for topic-based analysis")
     parser.add_argument('--topics_path', type=str, default='scripts/topics.json', help='Path to topics JSON file')
-    parser.add_argument('--output_df_path', type=str, default='data/raw/youtube_comments_df.csv', help='Output CSV file path')
+    parser.add_argument('--output_df_path', type=str, default='data/raw/youtube_comments_df.parquet', help='Output Parquet file path')
     parser.add_argument('--X', type=int, default=20, help='Number of topics to sample')
     parser.add_argument('--Y', type=int, default=50, help='Number of videos per topic')
     parser.add_argument('--K', type=int, default=70, help='Number of comments per video (must be divisible by 2)')
@@ -107,5 +106,6 @@ if __name__ == "__main__":
         X=args.X,
         Y=args.Y,
         K=args.K,
-        seed=args.seed
+        seed=args.seed,
+        force=args.force
     )

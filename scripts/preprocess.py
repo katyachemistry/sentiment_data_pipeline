@@ -3,7 +3,39 @@ import pandas as pd
 import re
 import string
 
-def process_and_save_data(input_file_path, output_file_path):
+def load_data(no_anomaly_path: str, auto_annotated_path: str, manual_path: str) -> pd.DataFrame:
+    """
+    Load and annotate the no_anomaly_data DataFrame using auto and manual annotations.
+
+    Parameters:
+        no_anomaly_path (str): Path to the no_anomaly_data parquet file.
+        auto_annotated_path (str): Path to the auto_annotated CSV file.
+        manual_path (str): Path to the manual annotations CSV file.
+
+    Returns:
+        pd.DataFrame: Annotated DataFrame with 'sentiment' column added.
+    """
+    # Load datasets
+    no_anomaly_data = pd.read_parquet(no_anomaly_path)
+    auto_annotated = pd.read_csv(auto_annotated_path)
+    manual = pd.read_csv(manual_path)
+
+    # Prepare manual data
+    manual = manual[['text', 'sentiment']]
+    sentiment_mapping = {'Neutral': 0, "Negative": -1, "Positive": 1}
+    manual['sentiment'] = manual['sentiment'].apply(lambda x: sentiment_mapping[x])
+
+    # Build sentiment dictionary
+    sentiment_dict = {row['text']: row['sentiment'] for _, row in auto_annotated.iterrows()}
+    sentiment_dict.update({row['text']: row['sentiment'] for _, row in manual.iterrows()})  # manual overrides auto
+
+    # Map sentiments to the no_anomaly_data
+    no_anomaly_data['sentiment'] = no_anomaly_data['text'].map(sentiment_dict)
+
+    return no_anomaly_data
+
+
+def process_and_save_data(input_data):
     """
     Loads the dataset, cleans the text, processes it with SpaCy,
     and saves the cleaned data to a new CSV file.
@@ -43,32 +75,33 @@ def process_and_save_data(input_file_path, output_file_path):
         doc = nlp(text)
         return " ".join([token.lemma_ for token in doc if not token.is_stop])
 
-    # Load dataset
-    agg_data = pd.read_csv(input_file_path)
-    agg_data.drop_duplicates(inplace=True)
+    # Initial size
+    print(f"Initial data size: {input_data.shape}")
+
+    # Remove duplicates
+    input_data.drop_duplicates(inplace=True)
+    print(f"After dropping duplicates: {input_data.shape}")
 
     # Clean text
-    agg_data['text'] = agg_data['text'].apply(clean_text)
+    input_data['text'] = input_data['text'].apply(clean_text)
+    print("Text cleaned")
 
     # Remove rows with no English letters
-    agg_data = agg_data[agg_data['text'].apply(contains_letters)]
+    before_filter = input_data.shape[0]
+    input_data = input_data[input_data['text'].apply(contains_letters)]
+    after_filter = input_data.shape[0]
+    print(f"Removed {before_filter - after_filter} rows without English letters. Remaining: {after_filter}")
 
     # Load spaCy model
     nlp = spacy.load("en_core_web_sm")
+    print("spaCy model loaded")
 
     # Preprocess text with spaCy
-    agg_data['text'] = agg_data['text'].apply(lambda text: preprocess_spacy(text, nlp))
+    input_data['text'] = input_data['text'].apply(lambda text: preprocess_spacy(text, nlp))
+    print(f"Text preprocessing complete. Final data size: {input_data.shape}")
+    print(f"Final labelled data size: {input_data[~input_data['sentiment'].isna()].shape}")
+    input_data.to_parquet('data/cleaned_data.parquet')
 
-    # Save cleaned data to a new CSV file
-    agg_data.to_csv(output_file_path, index=False)
+    return input_data
 
-    print(f"Data cleaned and saved to {output_file_path}")
-
-
-if __name__ == "__main__":
-    # Define file paths
-    input_file = 'data/aggregated_dataset.csv'
-    output_file = 'data/cleaned_dataset.csv'
-
-    # Process and save the data
-    process_and_save_data(input_file, output_file)
+    
