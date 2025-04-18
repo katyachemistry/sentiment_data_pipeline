@@ -22,7 +22,7 @@ def load_data(path: str = 'data/cleaned_data.parquet', new_labels_path = 'data/a
         labeled_data.reset_index(inplace=True, drop=True)
         return labeled_data
 
-def run_active_learning(data: pd.DataFrame, batch_num = 0, n_queries: int = 200):
+def run_active_learning(data: pd.DataFrame, batch_num = 0, n_queries: int = 200, save_model=False):
 
     if batch_num == 0:
         # Encode sentiment labels (-1, 0, 1)
@@ -73,6 +73,12 @@ def run_active_learning(data: pd.DataFrame, batch_num = 0, n_queries: int = 200)
     print(f"📦 Remaining unlabeled data saved to: data/active_learning/unlabeled_data.csv")
 
     print(f"✅ Saved {n_queries} most uncertain samples to: {output_path}")
+
+    if save_model:
+        import pickle
+        with open(f'model_{batch_num}.pkl', 'wb') as file:
+            pickle.dump(base_estimator, file)
+        print(f"✅ Saved model to model_{batch_num}.pkl")
 
 if __name__ == "__main__":
     parser = argparse.ArgumentParser(description="Run active learning to select most uncertain samples.")

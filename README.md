@@ -146,6 +146,8 @@ The last module is wrapped in OP and JOB and can be manually triggered each roun
 
 - n_queries is the number of records to select for manual annotation
 
+- save_model - boolean
+
 ## How to Run
 
 ### Requirements:
