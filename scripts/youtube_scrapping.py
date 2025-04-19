@@ -87,6 +87,8 @@ def parse_youtube_comments(
     df.to_parquet(output_df_path, index=False)
     print(f"✅ Saved DataFrame with {len(df)} comments to {output_df_path}")
 
+    return df
+
 
 if __name__ == "__main__":
     parser = argparse.ArgumentParser(description="Scrape YouTube comments for topic-based analysis")

@@ -42,5 +42,7 @@ def download_and_extract_kaggle_data(
     os.remove(csv_path)
     print(f"🗑️ Removed original CSV: {csv_path}")
 
+    return df
+
 if __name__ == "__main__":
     download_and_extract_kaggle_data()

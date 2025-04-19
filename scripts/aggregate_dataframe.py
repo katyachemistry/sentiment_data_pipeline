@@ -34,6 +34,7 @@ def aggregate_datasets():
     concatenated.to_parquet('data/aggregated_dataset.parquet', index=False)
 
     print("✅ Process completed successfully!")
+    return concatenated
 
 if __name__ == "__main__":
     aggregate_datasets()

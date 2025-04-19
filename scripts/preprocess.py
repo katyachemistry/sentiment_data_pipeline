@@ -3,7 +3,7 @@ import pandas as pd
 import re
 import string
 
-def load_data(no_anomaly_path: str, auto_annotated_path: str, manual_path: str) -> pd.DataFrame:
+def load_data_for_preprocessing(no_anomaly_data: pd.DataFrame, auto_annotated: pd.DataFrame, manual_path: str) -> pd.DataFrame:
     """
     Load and annotate the no_anomaly_data DataFrame using auto and manual annotations.
 
@@ -16,8 +16,6 @@ def load_data(no_anomaly_path: str, auto_annotated_path: str, manual_path: str) 
         pd.DataFrame: Annotated DataFrame with 'sentiment' column added.
     """
     # Load datasets
-    no_anomaly_data = pd.read_parquet(no_anomaly_path)
-    auto_annotated = pd.read_csv(auto_annotated_path)
     manual = pd.read_csv(manual_path)
 
     # Prepare manual data
@@ -38,11 +36,8 @@ def load_data(no_anomaly_path: str, auto_annotated_path: str, manual_path: str) 
 def process_and_save_data(input_data):
     """
     Loads the dataset, cleans the text, processes it with SpaCy,
-    and saves the cleaned data to a new CSV file.
+    and saves the cleaned data to a new parquet file.
 
-    Parameters:
-    - input_file_path: The file path of the input CSV.
-    - output_file_path: The file path where the cleaned data will be saved.
     """
     def clean_text(text):
         """Cleans the text by removing links, mentions, time formats, numbers, punctuation, and non-ASCII characters."""
@@ -77,6 +72,7 @@ def process_and_save_data(input_data):
 
     # Initial size
     print(f"Initial data size: {input_data.shape}")
+    input_data['sentiment'] = input_data['sentiment'].astype(float)
 
     # Remove duplicates
     input_data.drop_duplicates(inplace=True)

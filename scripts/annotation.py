@@ -11,7 +11,7 @@ from sklearn.feature_selection import mutual_info_classif
 from scipy.stats import entropy
 
 
-def detect_anomalies(input_path: str, output_path: str = 'data/no_anomaly_data.parquet', sample_size: int = 20000) -> str:
+def detect_anomalies(input_path: str, output_path: str = 'data/no_anomaly_data.parquet', sample_size: int = 20000) -> pd.DataFrame:
     print("📌 Loading data...")
     data = pd.read_parquet(input_path).sample(sample_size, random_state=42)
 
@@ -26,12 +26,11 @@ def detect_anomalies(input_path: str, output_path: str = 'data/no_anomaly_data.p
     data_clean.to_parquet(output_path, index=False)
     print(f"✅ Saved cleaned data without anomalies to {output_path} ({len(data_clean)} rows)")
 
-    return output_path
+    return data_clean
 
 
-def auto_annotate(data_path: str = 'data/no_anomaly_data.parquet', save_needed: bool = False, sample_size: int = 2000, output_path: str = 'data/auto_annotated.parquet') -> pd.DataFrame:
+def auto_annotate(data_sample: pd.DataFrame, save_needed: bool = False, sample_size: int = 2000, output_path: str = 'data/auto_annotated.parquet') -> pd.DataFrame:
     print("✍️ Annotating sentiment...")
-    data_sample = pd.read_parquet(data_path)
     data_sample = data_sample.sample(sample_size, random_state=42).copy()
 
     model_name = "cardiffnlp/twitter-roberta-base-sentiment"
@@ -123,6 +122,8 @@ def analyze_complexity(df: pd.DataFrame, conclusion_txt: str = "complexity_repor
         f.write("\n📊 Visualizations saved in 'complexity_analysis/' folder.\n")
 
     print("✅ Complexity report and data splits saved.")
+
+    return confident, non_confident
 
 
 
