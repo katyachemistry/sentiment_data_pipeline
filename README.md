@@ -134,7 +134,6 @@ The first three modules are assets which can be materialized:
 
 <img src="imgs/Global_Asset_Lineage.svg" alt="Alt text" width="700"/>
 
-Preprocessing step happens after the manual annotation step, therefore, it is separated.
 
 The last module is wrapped in OP and JOB and can be manually triggered each round of the annotation, but the configuration file should be provided beforehand in the CLI or UI Launchpad:
 
